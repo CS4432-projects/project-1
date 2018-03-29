@@ -2,6 +2,7 @@ package simpledb.buffer;
 
 import simpledb.file.*;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -14,6 +15,8 @@ class BasicBufferMgr {
    private int numAvailable;
 
    private LinkedList<Buffer> availableBuffers;
+
+   private HashMap<Block, Buffer> mapBlockToBuffer;
    
    /**
     * Creates a buffer manager having the specified number 
@@ -36,6 +39,7 @@ class BasicBufferMgr {
          bufferpool[i] = new Buffer();
          availableBuffers.add(bufferpool[i]);
       }
+      mapBlockToBuffer = new HashMap<>();
    }
    
    /**
@@ -63,7 +67,9 @@ class BasicBufferMgr {
          buff = chooseUnpinnedBuffer();
          if (buff == null)
             return null;
+         mapBlockToBuffer.remove(buff.block());
          buff.assignToBlock(blk);
+         mapBlockToBuffer.put(buff.block(), buff);
       }
       if (!buff.isPinned()) {
          numAvailable--;
@@ -86,7 +92,9 @@ class BasicBufferMgr {
       Buffer buff = chooseUnpinnedBuffer();
       if (buff == null)
          return null;
+      mapBlockToBuffer.remove(buff.block());
       buff.assignToNew(filename, fmtr);
+      mapBlockToBuffer.put(buff.block(), buff);
       numAvailable--;
       availableBuffers.remove(buff);
       buff.pin();
@@ -114,12 +122,7 @@ class BasicBufferMgr {
    }
    
    private Buffer findExistingBuffer(Block blk) {
-      for (Buffer buff : bufferpool) {
-         Block b = buff.block();
-         if (b != null && b.equals(blk))
-            return buff;
-      }
-      return null;
+      return mapBlockToBuffer.get(blk);
    }
    
    private Buffer chooseUnpinnedBuffer() {
