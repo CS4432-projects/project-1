@@ -2,6 +2,8 @@ package simpledb.buffer;
 
 import simpledb.file.*;
 
+import java.util.LinkedList;
+
 /**
  * Manages the pinning and unpinning of buffers to blocks.
  * @author Edward Sciore
@@ -10,6 +12,8 @@ import simpledb.file.*;
 class BasicBufferMgr {
    private Buffer[] bufferpool;
    private int numAvailable;
+
+   private LinkedList<Buffer> availableBuffers;
    
    /**
     * Creates a buffer manager having the specified number 
@@ -27,8 +31,11 @@ class BasicBufferMgr {
    BasicBufferMgr(int numbuffs) {
       bufferpool = new Buffer[numbuffs];
       numAvailable = numbuffs;
-      for (int i=0; i<numbuffs; i++)
+      availableBuffers = new LinkedList<>();
+      for (int i=0; i<numbuffs; i++) {
          bufferpool[i] = new Buffer();
+         availableBuffers.add(bufferpool[i]);
+      }
    }
    
    /**
@@ -58,8 +65,10 @@ class BasicBufferMgr {
             return null;
          buff.assignToBlock(blk);
       }
-      if (!buff.isPinned())
+      if (!buff.isPinned()) {
          numAvailable--;
+         availableBuffers.remove(buff);
+      }
       buff.pin();
       return buff;
    }
@@ -79,6 +88,7 @@ class BasicBufferMgr {
          return null;
       buff.assignToNew(filename, fmtr);
       numAvailable--;
+      availableBuffers.remove(buff);
       buff.pin();
       return buff;
    }
@@ -89,8 +99,10 @@ class BasicBufferMgr {
     */
    synchronized void unpin(Buffer buff) {
       buff.unpin();
-      if (!buff.isPinned())
+      if (!buff.isPinned()) {
          numAvailable++;
+         availableBuffers.add(buff);
+      }
    }
    
    /**
@@ -111,9 +123,6 @@ class BasicBufferMgr {
    }
    
    private Buffer chooseUnpinnedBuffer() {
-      for (Buffer buff : bufferpool)
-         if (!buff.isPinned())
-         return buff;
-      return null;
+      return availableBuffers.getFirst();
    }
 }
