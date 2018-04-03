@@ -20,6 +20,16 @@ public class Buffer {
    private int modifiedBy = -1;  // negative means not modified
    private int logSequenceNumber = -1; // negative means no corresponding log record
 
+   private long lastUsed = -1;
+
+   public void setLastUsed() {
+      lastUsed = System.currentTimeMillis();
+   }
+   public long getLastUsed() {
+      return lastUsed;
+   }
+
+
    /**
     * Creates a new buffer, wrapping a new 
     * {@link simpledb.file.Page page}.  

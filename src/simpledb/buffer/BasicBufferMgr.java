@@ -73,6 +73,7 @@ class BasicBufferMgr {
          availableBuffers.remove(buff);
       }
       buff.pin();
+      buff.setLastUsed();
       return buff;
    }
    
@@ -94,6 +95,7 @@ class BasicBufferMgr {
       mapBlockToBuffer.put(buff.block(), buff);
       availableBuffers.remove(buff);
       buff.pin();
+      buff.setLastUsed();
       return buff;
    }
    
@@ -103,6 +105,7 @@ class BasicBufferMgr {
     */
    synchronized void unpin(Buffer buff) {
       buff.unpin();
+      buff.setLastUsed();
       if (!buff.isPinned()) {
          availableBuffers.add(buff);
       }
@@ -117,10 +120,27 @@ class BasicBufferMgr {
    }
    
    private Buffer findExistingBuffer(Block blk) {
-      return mapBlockToBuffer.get(blk);
+      Buffer buff = mapBlockToBuffer.get(blk);
+      if (buff != null) {
+         buff.setLastUsed();
+      }
+      return buff;
    }
    
    private Buffer chooseUnpinnedBuffer() {
-      return availableBuffers.getFirst();
+      // check for empty frames
+      for (Buffer buff : availableBuffers) {
+         if (buff.block() == null) {
+            return buff;
+         }
+      }
+      // find least recently used
+      Buffer min = availableBuffers.getFirst();
+      for (Buffer buff : availableBuffers) {
+         if (buff.getLastUsed() < min.getLastUsed()) {
+            min = buff;
+         }
+      }
+      return min;
    }
 }
