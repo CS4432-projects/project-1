@@ -17,6 +17,8 @@ class BasicBufferMgr {
    private LinkedList<Buffer> availableBuffers;
 
    private HashMap<Block, Buffer> mapBlockToBuffer;
+
+   private int clockPointer = 0;
    
    /**
     * Creates a buffer manager having the specified number 
@@ -74,7 +76,11 @@ class BasicBufferMgr {
          availableBuffers.remove(buff);
       }
       buff.pin();
-      buff.setLastUsed();
+      if (Startup.REPLACEMENT_POLICY.equals("LRU")) {
+         buff.setLastUsed();
+      } else { // CLOCK
+         buff.refOn();
+      }
       return buff;
    }
    
@@ -96,7 +102,11 @@ class BasicBufferMgr {
       mapBlockToBuffer.put(buff.block(), buff);
       availableBuffers.remove(buff);
       buff.pin();
-      buff.setLastUsed();
+      if (Startup.REPLACEMENT_POLICY.equals("LRU")) {
+         buff.setLastUsed();
+      } else { // CLOCK
+         buff.refOn();
+      }
       return buff;
    }
    
@@ -106,10 +116,15 @@ class BasicBufferMgr {
     */
    synchronized void unpin(Buffer buff) {
       buff.unpin();
-      buff.setLastUsed();
+      if (Startup.REPLACEMENT_POLICY.equals("LRU")) {
+         buff.setLastUsed();
+      } else { // CLOCK
+         buff.refOn();
+      }
       if (!buff.isPinned()) {
          availableBuffers.add(buff);
       }
+
    }
    
    /**
@@ -145,6 +160,20 @@ class BasicBufferMgr {
           }
           return min;
       } else {//CLOCK
+          boolean foundFrame = false;
+          while (!foundFrame) {
+             for (; clockPointer < bufferpool.length; clockPointer++) {
+                Buffer buff = bufferpool[clockPointer];
+                if (!buff.isPinned() && buff.getRefBit() == 1) {
+                   buff.refOff();
+                } else if (!buff.isPinned() && buff.getRefBit() == 0) {
+                   return buff;
+                }
+             }
+             if (clockPointer >= bufferpool.length) {
+                clockPointer = 0;
+             }
+          }
           return availableBuffers.getFirst();
       }
    }

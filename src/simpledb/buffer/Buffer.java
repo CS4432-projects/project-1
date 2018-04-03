@@ -21,12 +21,23 @@ public class Buffer {
    private int logSequenceNumber = -1; // negative means no corresponding log record
 
    private long lastUsed = -1;
+   private int refBit = 0;
 
    public void setLastUsed() {
       lastUsed = System.currentTimeMillis();
    }
    public long getLastUsed() {
       return lastUsed;
+   }
+   public long getRefBit() {
+      return refBit;
+   }
+
+   public void refOn() {
+      refBit = 1;
+   }
+   public void refOff() {
+      refBit = 0;
    }
 
 
