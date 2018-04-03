@@ -39,6 +39,7 @@ class BasicBufferMgr {
       for (int i=0; i<numbuffs; i++) {
          bufferpool[i] = new Buffer();
          availableBuffers.add(bufferpool[i]);
+         bufferpool[i].setBufferID(i);
       }
       mapBlockToBuffer = new HashMap<>();
    }
@@ -176,5 +177,13 @@ class BasicBufferMgr {
           }
           return availableBuffers.getFirst();
       }
+   }
+
+   public String toString() {
+      String result = "";
+      for (int i = 0; i < bufferpool.length; i++) {
+         result += bufferpool[i].toString();
+      }
+      return result;
    }
 }

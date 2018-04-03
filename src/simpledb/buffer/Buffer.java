@@ -14,6 +14,7 @@ import simpledb.file.*;
  * @author Edward Sciore
  */
 public class Buffer {
+   private int buffer_id = -1;
    private Page contents = new Page();
    private Block blk = null;
    private int pins = 0;
@@ -25,6 +26,9 @@ public class Buffer {
 
    public void setLastUsed() {
       lastUsed = System.currentTimeMillis();
+   }
+   public void setBufferID(int id) {
+      buffer_id = id;
    }
    public long getLastUsed() {
       return lastUsed;
@@ -207,5 +211,9 @@ public class Buffer {
       fmtr.format(contents);
       blk = contents.append(filename);
       pins = 0;
+   }
+
+   public String toString() {
+      return "[buffer_id " + buffer_id + ", block " + blk + ", pinned? " + isPinned() + "]";
    }
 }
