@@ -1,6 +1,7 @@
 package simpledb.buffer;
 
 import simpledb.file.*;
+import simpledb.server.Startup;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -134,13 +135,17 @@ class BasicBufferMgr {
             return buff;
          }
       }
-      // find least recently used
-      Buffer min = availableBuffers.getFirst();
-      for (Buffer buff : availableBuffers) {
-         if (buff.getLastUsed() < min.getLastUsed()) {
-            min = buff;
-         }
+      if (Startup.REPLACEMENT_POLICY.equals("LRU")) {
+          // find least recently used
+          Buffer min = availableBuffers.getFirst();
+          for (Buffer buff : availableBuffers) {
+              if (buff.getLastUsed() < min.getLastUsed()) {
+                  min = buff;
+              }
+          }
+          return min;
+      } else {//CLOCK
+          return availableBuffers.getFirst();
       }
-      return min;
    }
 }
