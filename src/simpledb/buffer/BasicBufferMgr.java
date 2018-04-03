@@ -12,7 +12,6 @@ import java.util.LinkedList;
  */
 class BasicBufferMgr {
    private Buffer[] bufferpool;
-   private int numAvailable;
 
    private LinkedList<Buffer> availableBuffers;
 
@@ -33,7 +32,6 @@ class BasicBufferMgr {
     */
    BasicBufferMgr(int numbuffs) {
       bufferpool = new Buffer[numbuffs];
-      numAvailable = numbuffs;
       availableBuffers = new LinkedList<>();
       for (int i=0; i<numbuffs; i++) {
          bufferpool[i] = new Buffer();
@@ -72,7 +70,6 @@ class BasicBufferMgr {
          mapBlockToBuffer.put(buff.block(), buff);
       }
       if (!buff.isPinned()) {
-         numAvailable--;
          availableBuffers.remove(buff);
       }
       buff.pin();
@@ -95,7 +92,6 @@ class BasicBufferMgr {
       mapBlockToBuffer.remove(buff.block());
       buff.assignToNew(filename, fmtr);
       mapBlockToBuffer.put(buff.block(), buff);
-      numAvailable--;
       availableBuffers.remove(buff);
       buff.pin();
       return buff;
@@ -108,7 +104,6 @@ class BasicBufferMgr {
    synchronized void unpin(Buffer buff) {
       buff.unpin();
       if (!buff.isPinned()) {
-         numAvailable++;
          availableBuffers.add(buff);
       }
    }
@@ -118,7 +113,7 @@ class BasicBufferMgr {
     * @return the number of available buffers
     */
    int available() {
-      return numAvailable;
+      return availableBuffers.size();
    }
    
    private Buffer findExistingBuffer(Block blk) {
