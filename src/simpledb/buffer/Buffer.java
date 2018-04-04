@@ -14,6 +14,10 @@ import simpledb.file.*;
  * @author Edward Sciore
  */
 public class Buffer {
+   /**
+    * CS4432-Project1:
+    * buffer_id: The index of the buffer in the buffer pool, added for use in toString() function.
+    */
    private int buffer_id = -1;
    private Page contents = new Page();
    private Block blk = null;
@@ -21,25 +25,62 @@ public class Buffer {
    private int modifiedBy = -1;  // negative means not modified
    private int logSequenceNumber = -1; // negative means no corresponding log record
 
+   /**
+    * CS4432-Project1:
+    * lastUsed: Last time the buffer was accessed, used by LRU policy.
+    */
    private long lastUsed = -1;
+
+   /**
+    * CS4432-Project1:
+    * refBit: Second chance bit for Clock policy.
+    */
    private int refBit = 0;
 
+   /**
+    * CS4432-Project1:
+    * Sets the lastUsed variable to the current time.
+    */
    public void setLastUsed() {
       lastUsed = System.currentTimeMillis();
    }
+
+   /**
+    * CS4432-Project1:
+    * Sets the buffer_id variable.
+    */
    public void setBufferID(int id) {
       buffer_id = id;
    }
+
+   /**
+    * CS4432-Project1:
+    * Gets the lastUsed variable.
+    */
    public long getLastUsed() {
       return lastUsed;
    }
+
+   /**
+    * CS4432-Project1:
+    * Gets the refBit variable.
+    */
    public long getRefBit() {
       return refBit;
    }
 
+   /**
+    * CS4432-Project1:
+    * Turns the refBit on (sets it to 1.)
+    */
    public void refOn() {
       refBit = 1;
    }
+
+   /**
+    * CS4432-Project1:
+    * Turns the refBit off (sets it to 0.)
+    */
    public void refOff() {
       refBit = 0;
    }
@@ -213,6 +254,10 @@ public class Buffer {
       pins = 0;
    }
 
+   /**
+    * CS4432-Project1:
+    * Prints out a string representation of the buffer.
+    */
    public String toString() {
       return "[buffer_id " + buffer_id + ", block " + blk + ", pinned? " + isPinned() + "]";
    }

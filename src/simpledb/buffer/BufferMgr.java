@@ -122,6 +122,10 @@ public class BufferMgr {
       return System.currentTimeMillis() - starttime > MAX_TIME;
    }
 
+   /**
+    * CS4432-Project1:
+    * Prints out a string representation of the buffer pool.
+    */
    public String toString() {
       return bufferMgr.toString();
    }

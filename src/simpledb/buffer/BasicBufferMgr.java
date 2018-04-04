@@ -14,10 +14,22 @@ import java.util.LinkedList;
 class BasicBufferMgr {
    private Buffer[] bufferpool;
 
+   /**
+    * CS4432-Project1:
+    * A LinkedList of the currently unpinned buffers.
+    */
    private LinkedList<Buffer> availableBuffers;
 
+   /**
+    * CS4432-Project1:
+    * A HashMap of blocks and their associated buffers.
+    */
    private HashMap<Block, Buffer> mapBlockToBuffer;
 
+   /**
+    * CS4432-Project1:
+    * The current index of the buffer pool used with the Clock replacement policy.
+    */
    private int clockPointer = 0;
    
    /**
@@ -38,6 +50,10 @@ class BasicBufferMgr {
       availableBuffers = new LinkedList<>();
       for (int i=0; i<numbuffs; i++) {
          bufferpool[i] = new Buffer();
+         /**
+          * CS4432-Project1:
+          * Initially add all frames to available buffers.
+          */
          availableBuffers.add(bufferpool[i]);
          bufferpool[i].setBufferID(i);
       }
@@ -62,6 +78,10 @@ class BasicBufferMgr {
     * Returns a null value if there are no available buffers.
     * @param blk a reference to a disk block
     * @return the pinned buffer
+    *
+    * CS4432-Project1:
+    * Added logic for removing the buffer from the list of available buffers and mapping the block to the associated buffer.
+    * Added logic to set state based on the specified replacement policy.
     */
    synchronized Buffer pin(Block blk) {
       Buffer buff = findExistingBuffer(blk);
@@ -93,6 +113,10 @@ class BasicBufferMgr {
     * @param filename the name of the file
     * @param fmtr a pageformatter object, used to format the new block
     * @return the pinned buffer
+    *
+    * CS4432-Project1:
+    * Added logic for removing the buffer from the list of available buffers and mapping the block to the associated buffer.
+    * Added logic to set state based on the specified replacement policy.
     */
    synchronized Buffer pinNew(String filename, PageFormatter fmtr) {
       Buffer buff = chooseUnpinnedBuffer();
@@ -114,6 +138,9 @@ class BasicBufferMgr {
    /**
     * Unpins the specified buffer.
     * @param buff the buffer to be unpinned
+    *
+    * CS4432-Project1:
+    * Added logic for different replacement policies.
     */
    synchronized void unpin(Buffer buff) {
       buff.unpin();
@@ -135,7 +162,11 @@ class BasicBufferMgr {
    int available() {
       return availableBuffers.size();
    }
-   
+
+   /**
+    * CS4432-Project1:
+    * Use HashMap to find existing blocks in the buffer.
+    */
    private Buffer findExistingBuffer(Block blk) {
       Buffer buff = mapBlockToBuffer.get(blk);
       if (buff != null) {
@@ -143,7 +174,12 @@ class BasicBufferMgr {
       }
       return buff;
    }
-   
+
+   /**
+    * CS4432-Project1:
+    * Checks for empty frames first.
+    * If no empty frames are available, chooses buffer based on specified replacement policy (either LRU or Clock.)
+    */
    private Buffer chooseUnpinnedBuffer() {
       // check for empty frames
       for (Buffer buff : availableBuffers) {
@@ -179,6 +215,10 @@ class BasicBufferMgr {
       }
    }
 
+   /**
+    * CS4432-Project1:
+    * Prints out a string representation of the buffer pool.
+    */
    public String toString() {
       String result = "";
       for (int i = 0; i < bufferpool.length; i++) {
