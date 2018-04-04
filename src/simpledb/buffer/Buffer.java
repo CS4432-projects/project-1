@@ -42,7 +42,7 @@ public class Buffer {
     * Sets the lastUsed variable to the current time.
     */
    public void setLastUsed() {
-      lastUsed = System.currentTimeMillis();
+      lastUsed = System.nanoTime();
    }
 
    /**
@@ -195,14 +195,14 @@ public class Buffer {
    /**
     * Increases the buffer's pin count.
     */
-   void pin() {
+   public void pin() {
       pins++;
    }
 
    /**
     * Decreases the buffer's pin count.
     */
-   void unpin() {
+   public void unpin() {
       pins--;
    }
 
@@ -211,7 +211,7 @@ public class Buffer {
     * (that is, if it has a nonzero pin count).
     * @return true if the buffer is pinned
     */
-   boolean isPinned() {
+   public boolean isPinned() {
       return pins > 0;
    }
 
@@ -232,10 +232,19 @@ public class Buffer {
     * of the previous page are first written to disk.
     * @param b a reference to the data block
     */
-   void assignToBlock(Block b) {
+   public void assignToBlock(Block b) {
       flush();
       blk = b;
       contents.read(blk);
+      pins = 0;
+   }
+
+   /**
+    * CS4432-Project1:
+    * Associates a block with a buffer. Only to be used in TestBufferMgr
+    */
+   public void testAssignBlock(Block b) {
+      blk = b;
       pins = 0;
    }
 
