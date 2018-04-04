@@ -21,6 +21,12 @@ class TestBufferMgr {
 
     /**
      * CS4432-Project1:
+     * A LinkedList of the currently empty buffers.
+     */
+    private LinkedList<Buffer> emptyBuffers;
+
+    /**
+     * CS4432-Project1:
      * A HashMap of blocks and their associated buffers.
      */
     private HashMap<Block, Buffer> mapBlockToBuffer;
@@ -47,6 +53,7 @@ class TestBufferMgr {
     TestBufferMgr(int numbuffs) {
         bufferpool = new Buffer[numbuffs];
         availableBuffers = new LinkedList<>();
+        emptyBuffers = new LinkedList<>();
         for (int i=0; i<numbuffs; i++) {
             bufferpool[i] = new Buffer();
             /**
@@ -54,6 +61,7 @@ class TestBufferMgr {
              * Initially add all frames to available buffers.
              */
             availableBuffers.add(bufferpool[i]);
+            emptyBuffers.add(bufferpool[i]);
             bufferpool[i].setBufferID(i);
         }
         mapBlockToBuffer = new HashMap<>();
@@ -142,10 +150,8 @@ class TestBufferMgr {
      */
     private Buffer chooseUnpinnedBuffer() {
         // check for empty frames
-        for (Buffer buff : availableBuffers) {
-            if (buff.block() == null) {
-                return buff;
-            }
+        if (emptyBuffers.size() > 0) {
+            return emptyBuffers.removeFirst();
         }
         if (Startup.REPLACEMENT_POLICY.equals("LRU")) {
             // find least recently used
