@@ -4,8 +4,8 @@ import simpledb.remote.*;
 import java.rmi.registry.*;
 
 public class Startup {
-   //public static String REPLACEMENT_POLICY = "LRU";
-   public static String REPLACEMENT_POLICY = "CLOCK";
+   public static String REPLACEMENT_POLICY = "LRU";
+   //public static String REPLACEMENT_POLICY = "CLOCK";
    public static void main(String args[]) throws Exception {
       // configure and initialize the database
       SimpleDB.init(args[0]);
